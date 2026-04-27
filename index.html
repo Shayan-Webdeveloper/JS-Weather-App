@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weather App</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+
+<header>
+<h2>🌤 Weather App</h2>
+<button class="toggle" onclick="toggle()">🌙</button>
+</header>
+
+<div class="search">
+<input id="city" placeholder="Enter city">
+<button onclick="getWeather()">Search</button>
+</div>
+
+<div class="container">
+<div class="card">
+
+<div class="top">
+  <div>
+    <div class="city" id="cityName">--</div>
+    <div id="time">--</div>
+  </div>
+  <div>
+    <h2 id="temp">--</h2>
+    <p id="desc">--</p>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="box"><i class="fa-solid fa-temperature-half"></i><p>Feels</p><h3 id="feels"></h3></div>
+  <div class="box"><i class="fa-solid fa-droplet"></i><p>Humidity</p><h3 id="humidity"></h3></div>
+  <div class="box"><i class="fa-solid fa-wind"></i><p>Wind</p><h3 id="wind"></h3></div>
+  <div class="box"><i class="fa-solid fa-gauge"></i><p>Pressure</p><h3 id="pressure"></h3></div>
+  <div class="box"><i class="fa-solid fa-sun"></i><p>Sunrise</p><h3 id="sunrise"></h3></div>
+  <div class="box"><i class="fa-solid fa-moon"></i><p>Sunset</p><h3 id="sunset"></h3></div>
+  <div class="box"><i class="fa-solid fa-calendar"></i><p>Date</p><h3 id="date"></h3></div>
+  <div class="box"><i class="fa-solid fa-calendar-day"></i><p>Day</p><h3 id="day"></h3></div>
+</div>
+
+<div class="section">
+<h3>⏱ 24 Hour Forecast</h3>
+<div class="scroll" id="hourly"></div>
+</div>
+
+<div class="section">
+<h3>📅 6 Days Forecast</h3>
+<div class="scroll" id="daily"></div>
+</div>
+
+</div>
+</div>
+
+<script src="./app.js"></script>
+
+</body>
+</html>
