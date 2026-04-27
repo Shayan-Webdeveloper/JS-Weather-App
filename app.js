@@ -8,7 +8,7 @@ function toggle(){
 }
 
 // ----------------------
-// GLOBAL TIME OFFSET (CITY TIME)
+// TIMEZONE OFFSET (CITY)
 // ----------------------
 let timezoneOffset = 0;
 
@@ -35,7 +35,15 @@ function formatDate(date){
 }
 
 // ----------------------
-// LIVE CLOCK (CITY TIME)
+// FIXED CITY TIME (IMPORTANT)
+// ----------------------
+function getCityTime(){
+  const utc = new Date().getTime() + (new Date().getTimezoneOffset() * 60000);
+  return new Date(utc + (timezoneOffset * 1000));
+}
+
+// ----------------------
+// LIVE CLOCK
 // ----------------------
 let clockInterval;
 
@@ -44,12 +52,8 @@ function startClock(){
   if(clockInterval) clearInterval(clockInterval);
 
   clockInterval = setInterval(() => {
-
-    // 👉 CITY TIME = UTC + OFFSET
-    const cityTime = new Date(Date.now() + timezoneOffset * 1000);
-
+    const cityTime = getCityTime();
     document.getElementById("time").innerText = formatTime(cityTime);
-
   }, 1000);
 }
 
@@ -89,7 +93,7 @@ async function getWeather(){
 
     const w = await weatherRes.json();
 
-    // 👉 SAVE CITY TIMEZONE OFFSET (IMPORTANT FIX)
+    // SAVE TIMEZONE OFFSET (IMPORTANT)
     timezoneOffset = w.timezone;
 
     // FORECAST
@@ -114,7 +118,7 @@ function updateUI(w, f, city){
 
   if(!w || !f) return;
 
-  const now = new Date(Date.now() + timezoneOffset * 1000);
+  const now = getCityTime();
 
   document.getElementById("cityName").innerText = city;
   document.getElementById("temp").innerText = w.main.temp + "°C";
@@ -126,16 +130,15 @@ function updateUI(w, f, city){
   document.getElementById("pressure").innerText = w.main.pressure + " hPa";
 
   // ----------------------
-  // SUNRISE / SUNSET (CITY TIME FIXED)
+  // SUNRISE / SUNSET (FIXED)
   // ----------------------
-  document.getElementById("sunrise").innerText =
-    formatTime(new Date((w.sys.sunrise + timezoneOffset) * 1000));
-
-  document.getElementById("sunset").innerText =
-    formatTime(new Date((w.sys.sunset + timezoneOffset) * 1000));
+document.getElementById("sunrise").innerText =
+  formatTime(new Date(w.sys.sunrise * 1000));
+document.getElementById("sunset").innerText =
+  formatTime(new Date(w.sys.sunset * 1000));
 
   // ----------------------
-  // DATE / DAY (CITY TIME)
+  // DATE / DAY
   // ----------------------
   document.getElementById("date").innerText = formatDate(now);
 
@@ -148,7 +151,7 @@ function updateUI(w, f, city){
   startClock();
 
   // ----------------------
-  // 24 HOUR FORECAST (CITY TIME)
+  // 24 HOUR FORECAST (FIXED TIME)
   // ----------------------
   let hourlyHTML = "";
 
