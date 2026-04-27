@@ -8,6 +8,11 @@ function toggle(){
 }
 
 // ----------------------
+// GLOBAL TIME OFFSET (CITY TIME)
+// ----------------------
+let timezoneOffset = 0;
+
+// ----------------------
 // FORMAT TIME (AM/PM)
 // ----------------------
 function formatTime(date){
@@ -30,16 +35,21 @@ function formatDate(date){
 }
 
 // ----------------------
-// LIVE CLOCK
+// LIVE CLOCK (CITY TIME)
 // ----------------------
 let clockInterval;
 
 function startClock(){
+
   if(clockInterval) clearInterval(clockInterval);
 
   clockInterval = setInterval(() => {
-    const now = new Date();
-    document.getElementById("time").innerText = formatTime(now);
+
+    // 👉 CITY TIME = UTC + OFFSET
+    const cityTime = new Date(Date.now() + timezoneOffset * 1000);
+
+    document.getElementById("time").innerText = formatTime(cityTime);
+
   }, 1000);
 }
 
@@ -79,7 +89,10 @@ async function getWeather(){
 
     const w = await weatherRes.json();
 
-    // FORECAST (5 DAY / 3 HOUR)
+    // 👉 SAVE CITY TIMEZONE OFFSET (IMPORTANT FIX)
+    timezoneOffset = w.timezone;
+
+    // FORECAST
     const forecastRes = await fetch(
       `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`
     );
@@ -101,7 +114,7 @@ function updateUI(w, f, city){
 
   if(!w || !f) return;
 
-  const now = new Date(w.dt * 1000);
+  const now = new Date(Date.now() + timezoneOffset * 1000);
 
   document.getElementById("cityName").innerText = city;
   document.getElementById("temp").innerText = w.main.temp + "°C";
@@ -113,19 +126,18 @@ function updateUI(w, f, city){
   document.getElementById("pressure").innerText = w.main.pressure + " hPa";
 
   // ----------------------
-  // SUNRISE / SUNSET (AM/PM)
+  // SUNRISE / SUNSET (CITY TIME FIXED)
   // ----------------------
   document.getElementById("sunrise").innerText =
-    formatTime(new Date(w.sys.sunrise * 1000));
+    formatTime(new Date((w.sys.sunrise + timezoneOffset) * 1000));
 
   document.getElementById("sunset").innerText =
-    formatTime(new Date(w.sys.sunset * 1000));
+    formatTime(new Date((w.sys.sunset + timezoneOffset) * 1000));
 
   // ----------------------
-  // DATE / DAY (DD/MM/YY)
+  // DATE / DAY (CITY TIME)
   // ----------------------
-  document.getElementById("date").innerText =
-    formatDate(now);
+  document.getElementById("date").innerText = formatDate(now);
 
   document.getElementById("day").innerText =
     now.toLocaleDateString("en-US", { weekday: "long" });
@@ -136,14 +148,17 @@ function updateUI(w, f, city){
   startClock();
 
   // ----------------------
-  // 24 HOUR FORECAST
+  // 24 HOUR FORECAST (CITY TIME)
   // ----------------------
   let hourlyHTML = "";
 
   f.list.slice(0, 8).forEach(item => {
+
+    const itemTime = new Date((item.dt + timezoneOffset) * 1000);
+
     hourlyHTML += `
       <div class="item">
-        <p>${formatTime(new Date(item.dt * 1000))}</p>
+        <p>${formatTime(itemTime)}</p>
         <i class="fa-solid fa-cloud"></i>
         <p>${item.main.temp}°C</p>
       </div>
@@ -153,7 +168,7 @@ function updateUI(w, f, city){
   document.getElementById("hourly").innerHTML = hourlyHTML;
 
   // ----------------------
-  // 5 DAY FORECAST (REAL DATA ONLY)
+  // 5 DAY FORECAST
   // ----------------------
   let dailyHTML = "";
   let days = {};
@@ -165,7 +180,7 @@ function updateUI(w, f, city){
     }
   });
 
-  Object.keys(days).slice(0,6).forEach(date => {
+  Object.keys(days).slice(0,5).forEach(date => {
     dailyHTML += `
       <div class="item">
         <p>${formatDate(new Date(date))}</p>
